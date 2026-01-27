@@ -2,52 +2,53 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
-    /**
-     * 1. Tampilkan Form Login
-     */
     public function showLoginForm()
     {
         return view('auth.login');
     }
 
-    /**
-     * 2. Proses Login
-     */
     public function login(Request $request)
     {
-        // Validasi input
         $credentials = $request->validate([
             'email'    => ['required', 'email'],
             'password' => ['required'],
         ]);
 
-        // Cek kredensial ke database
-        if (Auth::attempt($credentials)) {
+        $remember = $request->has('remember');
+
+        if (Auth::attempt($credentials, $remember)) {
             $request->session()->regenerate();
 
-            // Redirect berdasarkan role
-            if (Auth::user()->role === 'admin') {
-                return redirect()->route('admin.dashboard');
-            }
+            $role = Auth::user()->role;
 
-            return redirect()->route('user.dashboard');
+            switch ($role) {
+                case 'admin':
+                    return redirect()->route('admin.dashboard');
+
+                case 'masyarakat':
+                    return redirect()->route('user.lapor');
+
+                // case 'petugas':
+                //     return redirect()->route('petugas.dashboard');
+
+                default:
+                    // ⛔ ROLE TIDAK VALID → LOGOUTKAN
+                    Auth::logout();
+                    return redirect()->route('login')
+                        ->withErrors(['email' => 'Role user tidak dikenali']);
+            }
         }
 
-        // Jika login gagal
         return back()->withErrors([
             'email' => 'Email atau password salah!',
         ])->onlyInput('email');
     }
 
-    /**
-     * 3. Proses Logout
-     */
     public function logout(Request $request)
     {
         Auth::logout();
