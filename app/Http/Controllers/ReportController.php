@@ -16,7 +16,7 @@ class ReportController extends Controller
     {
         return view('user.lapor');
     }
-
+    
     /**
      * Memproses Data & Foto
      */
