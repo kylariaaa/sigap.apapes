@@ -14,9 +14,10 @@ class ReportController extends Controller
      */
     public function index()
     {
-        return view('user.lapor');
+        $myReports = Report::where('user_id', Auth::id())->orderBy('created_at', 'desc')->get();
+        return view('user.lapor', compact('myReports'));
     }
-    
+
     /**
      * Memproses Data & Foto
      */
