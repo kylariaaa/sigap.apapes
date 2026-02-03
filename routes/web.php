@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\ResponseController;
 use Illuminate\Support\Facades\Route;
 
 // Route::middleware('woy')->get('/', function () {
@@ -37,4 +38,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/report/{report}', [ReportController::class, 'show'])->name('report.show');
     //put dan wildcard (Put mengupdate data berdasarkan ID)
     Route::put('/report/{report}', [ReportController::class, 'update'])->name('report.update');
+
+    Route::post('/response', [ResponseController::class, 'store'])->name('response.store');
 });
