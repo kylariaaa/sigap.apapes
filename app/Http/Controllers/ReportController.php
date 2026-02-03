@@ -53,4 +53,37 @@ class ReportController extends Controller
             ->route('user.lapor') // Disarankan redirect ke route tertentu
             ->with('success', 'Laporan Anda telah berhasil terkirim!');
     }
+
+    // 3. Menampilkan Detail Laporan
+    public function show(Report $report)
+    {
+        // Mengambil detail laporan beserta:
+        // - user (pelapor)
+        // - responses dan user dari masing-masing response
+        // Konsep: Route Model Binding
+        $report->load([
+            'user',
+            'responses.user',
+        ]);
+
+        return view('admin.detail', compact('report'));
+    }
+
+    // 4. Update Status Laporan
+    public function update(Request $request, Report $report)
+    {
+        // Validasi input status
+        // Status hanya boleh: 0, proses, atau selesai
+        $validatedData = $request->validate([
+            'status' => 'required|in:0,proses,selesai',
+        ]);
+
+        // Update status laporan
+        $report->update($validatedData);
+
+        // Kembali ke halaman sebelumnya dengan pesan sukses
+        return redirect()
+            ->back()
+            ->with('success', 'Status laporan berhasil diperbarui!');
+    }
 }

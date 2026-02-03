@@ -32,4 +32,9 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/lapor', [ReportController::class, 'index'])->name('user.lapor');
     Route::post('/lapor', [ReportController::class, 'store'])->name('user.lapor.store');
+
+    //Get dan wildcard (Get menampilkan data berdasarkan ID)
+    Route::get('/report/{report}', [ReportController::class, 'show'])->name('report.show');
+    //put dan wildcard (Put mengupdate data berdasarkan ID)
+    Route::put('/report/{report}', [ReportController::class, 'update'])->name('report.update');
 });
