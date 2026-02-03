@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('responses', function (Blueprint $table) {
         $table->id();
-        $table->foreignId('report_id')->constrained('repost')->cascadeOnDelete();
+        $table->foreignId('report_id')->constrained('reports')->cascadeOnDelete();
 
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->text('response_text');
