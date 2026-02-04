@@ -91,7 +91,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($reports as $item)
+                        @foreach ($myReports as $item)
                             <tr>
                                 <td>
                                     {{ $item->created_at->format('d/m/Y') }}
@@ -129,7 +129,7 @@
                     </tbody>
                 </table>
 
-                @if ($reports->isEmpty())
+                @if ($myReports->isEmpty())
                     <p class="text-center text-muted mb-0">
                         Belum ada laporan.
                     </p>

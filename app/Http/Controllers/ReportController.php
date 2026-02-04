@@ -18,7 +18,7 @@ class ReportController extends Controller
                                     ->orderBy('created_at', 'desc')
                                     ->get();
         //return
-        return view('user.lapor', compact('reports'));
+        return view('user.lapor', compact( 'myReports'));
     }
 
     /**

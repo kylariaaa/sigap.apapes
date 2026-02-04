@@ -21,7 +21,7 @@ class AuthController extends Controller
     {
         // Validasi Input
         $credentials = $request->validate([
-            'email'    => 'email|required',
+            'username'    => 'required',
             'password' => 'required',
         ]);
 

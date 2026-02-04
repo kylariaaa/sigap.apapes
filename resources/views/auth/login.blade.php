@@ -24,14 +24,14 @@
                         @csrf
 
                         <div class="mb-3">
-                            <label for="email" class="form-label">Username</label>
+                            <label for="username" class="form-label">Username</label>
                             <input
-                                type="email"
-                                name="email"
-                                id="email"
+                                type="text"
+                                name="username"
+                                id="username"
                                 {{-- Tambahkan logika class error di sini --}}
-                                class="form-control @error('email') is-invalid @enderror"
-                                value="{{ old('email') }}"
+                                class="form-control @error('username') is-invalid @enderror"
+                                value="{{ old('username') }}"
                                 required autofocus
                             >
 
