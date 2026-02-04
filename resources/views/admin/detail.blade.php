@@ -93,7 +93,7 @@
                 <hr>
 
                 {{-- FORM TANGGAPAN --}}
-                <form action="{{ route('response.store') }}" method="POST">
+                <form action="{{ route('response.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf
 
                     <input type="hidden" name="report_id" value="{{ $report->id }}">
@@ -107,6 +107,14 @@
                             placeholder="Ketik balasan untuk warga..."
                             required
                         ></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="fw-bold">Lampirkan Gambar (Opsional):</label>
+                        <input
+                            type="file"
+                            name="image"
+                            class="form-control">
                     </div>
 
                     <button type="submit" class="btn btn-primary w-100">

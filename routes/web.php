@@ -5,9 +5,9 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ResponseController;
 use Illuminate\Support\Facades\Route;
 
-// Route::middleware('woy')->get('/', function () {
-//     return view('auth.login');
-// })->name('');
+Route::get('/', function () {
+    return redirect()->route('login');
+});
 
 // =====================
 // Jalur Tamu (Belum Login)
@@ -15,6 +15,10 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [AuthController::class, 'login'])->name('login.store');
+
+        //Jalur registrasi
+    Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
+    Route::post('/register', [AuthController::class, 'register'])->name('register.store');
 });
 
 // =====================

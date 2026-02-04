@@ -28,6 +28,11 @@
                             Login
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="{{ route('register') }}">
+                            Daftar Akun
+                        </a>
+                    </li>
                     @endguest
 
                     @auth

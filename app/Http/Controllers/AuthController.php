@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Report;
+use App\Models\User;
 
 class AuthController extends Controller
 {
@@ -32,10 +33,10 @@ class AuthController extends Controller
             // Cek Role
             if (Auth::user()->role === 'admin') {
                 return redirect()->route('admin.dashboard');
-            }else {
+            } else {
                 return redirect()->route('user.lapor');
+            }
         }
-    }
 
         // Jika Login Gagal
         return back()->withErrors([
@@ -58,5 +59,38 @@ class AuthController extends Controller
     {
         $reports = Report::orderBy('created_at', 'desc')->get();
         return view('admin.dashboard', compact('reports'));
+    }
+
+    // 1. Menampilkan Form Register
+    public function showRegisterForm()
+    {
+        return view('auth.register');
+    }
+
+    // 2. Proses Registrasi Warga Baru
+    public function register(Request $request)
+    {
+        // VALIDASI INPUT
+        $data = $request->validate([
+            'nik'      => 'required|numeric|unique:users,nik',
+            'name'     => 'required|string|max:255',
+            'username' => 'required|string|max:255|unique:users,username',
+            'password' => 'required|string|min:6',
+            'telp'     => 'required|numeric',
+        ]);
+
+        // SIMPAN KE DATABASE
+        User::create([
+            'nik'      => $data['nik'],
+            'name'     => $data['name'],
+            'username' => $data['username'],
+            'password' => bcrypt($data['password']), // Enkripsi password
+            'telp'     => $data['telp'],
+            'role'     => 'masyarakat', // Role default
+        ]);
+
+        return redirect()
+            ->route('login')
+            ->with('success', 'Akun berhasil dibuat! Silakan login.');
     }
 }

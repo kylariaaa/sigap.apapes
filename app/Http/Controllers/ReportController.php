@@ -14,8 +14,11 @@ class ReportController extends Controller
      */
     public function index()
     {
-        $myReports = Report::where('user_id', Auth::id())->orderBy('created_at', 'desc')->get();
-        return view('user.lapor', compact('myReports'));
+        $myReports = Report::where('user_id', Auth::id())
+                                    ->orderBy('created_at', 'desc')
+                                    ->get();
+        //return
+        return view('user.lapor', compact('reports'));
     }
 
     /**

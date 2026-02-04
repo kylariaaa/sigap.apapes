@@ -11,22 +11,26 @@ return new class extends Migration
      */
     public function up(): void
     {
-    Schema::create('users', function (Blueprint $table) {
+        Schema::create(
+            'users',
+            function (Blueprint $table) {
 
-        $table->id();
+                $table->id();
 
-        $table->string('identity_number')->unique();
-        $table->string('name');
-        $table->string('email')->unique();
-        $table->string('password');
-        $table->string('phone')->nullable();
-
-        $table->enum('role', ['admin', 'petugas', 'masyarakat'])->default('masyarakat');
-        $table->rememberToken();
-        $table->timestamps();
-        }
-    );
-}
+                $table->string('nik')->nullable()->unique();
+                $table->string('name');
+                $table->string('username')->unique(); // Login pakai ini
+                $table->string('telp')->nullable();
+                $table->enum('role', ['admin', 'masyarakat']);
+                // ---------------------------
+                $table->string('email')->nullable();
+                $table->timestamp('email_verified_at')->nullable();
+                $table->string('password');
+                $table->rememberToken();
+                $table->timestamps();
+            }
+        );
+    }
 
     /**
      * Reverse the migrations.

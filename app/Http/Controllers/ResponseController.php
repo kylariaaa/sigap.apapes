@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Response;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Response;
 
 class ResponseController extends Controller
 {
@@ -13,22 +13,32 @@ class ResponseController extends Controller
      */
     public function store(Request $request)
     {
-        // 1. Validasi data input
-        $validatedData = $request->validate([
+        // VALIDASI INPUT
+        $data = $request->validate([
             'report_id'     => 'required|exists:reports,id',
-            'response_text' => 'required',
+            'response_text' => 'required|string',
+            'image'         => 'nullable|image|max:2048', // Maks 2MB
         ]);
 
-        // 2. Simpan data ke tabel responses
+        // DEFAULT: tidak ada gambar
+        $imagePath = null;
+
+        // UPLOAD GAMBAR (jika ada)
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store(
+                'responses',
+                'public'
+            );
+        }
+
+        // SIMPAN KE DATABASE
         Response::create([
-            'report_id'     => $validatedData['report_id'],
-            'user_id'       => Auth::id(), // ID admin yang membalas
-            'response_text' => $validatedData['response_text'],
+            'report_id'     => $data['report_id'],
+            'user_id'       => Auth::id(),
+            'response_text' => $data['response_text'],
+            'image'         => $imagePath,
         ]);
 
-        // 3. Kembali ke halaman sebelumnya dengan pesan sukses
-        return redirect()
-            ->back()
-            ->with('success', 'Tanggapan berhasil dikirim!');
+        return back()->with('success', 'Tanggapan & bukti berhasil dikirim!');
     }
 }
