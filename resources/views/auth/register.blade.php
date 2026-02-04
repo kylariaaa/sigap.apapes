@@ -48,6 +48,18 @@
                     </div>
 
                     <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <input
+                            type="email"
+                            name="email"
+                            class="form-control"
+                            placeholder="email@contoh.com"
+                            value="{{ old('email') }}"
+                            required>
+                    </div>
+
+
+                    <div class="mb-3">
                         <label class="form-label">Username</label>
                         <input
                             type="text"

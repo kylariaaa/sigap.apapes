@@ -21,7 +21,7 @@ class AuthController extends Controller
     {
         // Validasi Input
         $credentials = $request->validate([
-            'email'    => 'required|email',
+            'email'    => 'email|required',
             'password' => 'required',
         ]);
 
@@ -76,6 +76,7 @@ class AuthController extends Controller
             'name'     => 'required|string|max:255',
             'username' => 'required|string|max:255|unique:users,username',
             'password' => 'required|string|min:6',
+            'email'    => 'nullable|email|unique:users,email',
             'telp'     => 'required|numeric',
         ]);
 
@@ -84,6 +85,7 @@ class AuthController extends Controller
             'nik'      => $data['nik'],
             'name'     => $data['name'],
             'username' => $data['username'],
+            'email'    => $data['email'],
             'password' => bcrypt($data['password']), // Enkripsi password
             'telp'     => $data['telp'],
             'role'     => 'masyarakat', // Role default
