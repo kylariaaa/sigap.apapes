@@ -6,6 +6,7 @@ use App\Models\Report;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ReportController extends Controller
 {
@@ -47,7 +48,9 @@ class ReportController extends Controller
             'user_id'     => Auth::id(),
             'title'       => $request->title,
             'description' => $request->description,
-            'location'    => $request->location,
+            'location' => $request->location, 
+            'latitude' => $request->latitude, 
+            'longitude' => $request->longitude, 
             'image'       => $imagePath,
             'status'      => '0',
         ]);
@@ -88,5 +91,11 @@ class ReportController extends Controller
         return redirect()
             ->back()
             ->with('success', 'Status laporan berhasil diperbarui!');
+    }
+
+    public function exportPdf() {
+        $reports = Report::all();
+        $pdf = Pdf::loadView('admin.print', ['reports' => $reports]);
+        return $pdf->download('laporan-pengaduan.pdf');
     }
 }

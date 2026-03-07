@@ -139,6 +139,15 @@
                                 <p class="mb-0 mt-1 text-dark small">
                                     {{ $response->response_text }}
                                 </p>
+
+                                @if ($response->image)
+                                    <img
+                                        src="{{ asset('storage/' . $response->image) }}"
+                                        class="img-fluid rounded mt-2"
+                                        style="max-height: 200px;"
+                                        alt="Bukti dari Admin"
+                                    >
+                                @endif
                             </div>
                         @endforeach
                     @else

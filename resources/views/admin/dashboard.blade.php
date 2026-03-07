@@ -8,6 +8,10 @@
         Data Laporan Masuk
     </div>
 
+    <a href="{{ route('report.export') }}" class="btn btn-danger mb-3">
+        Download PDF
+    </a>
+    
     <div class="card-body">
         <table class="table table-bordered table-striped">
             <thead>
