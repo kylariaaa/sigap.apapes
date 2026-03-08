@@ -21,7 +21,7 @@ class AuthController extends Controller
     {
         // Validasi Input
         $credentials = $request->validate([
-            'username'    => 'required',
+            'username' => 'required',
             'password' => 'required',
         ]);
 
@@ -40,8 +40,8 @@ class AuthController extends Controller
 
         // Jika Login Gagal
         return back()->withErrors([
-            'email' => 'Email atau password salah!',
-        ])->onlyInput('email');
+            'username' => 'Username atau password salah!',
+        ])->onlyInput('username');
     }
 
     // 3. Proses Logout
@@ -72,23 +72,23 @@ class AuthController extends Controller
     {
         // VALIDASI INPUT
         $data = $request->validate([
-            'nik'      => 'required|numeric|unique:users,nik',
-            'name'     => 'required|string|max:255',
+            'nik' => 'required|numeric|unique:users,nik',
+            'name' => 'required|string|max:255',
             'username' => 'required|string|max:255|unique:users,username',
             'password' => 'required|string|min:6',
-            'email'    => 'nullable|email|unique:users,email',
-            'telp'     => 'required|numeric',
+            'email' => 'nullable|email|unique:users,email',
+            'telp' => 'required|numeric',
         ]);
 
         // SIMPAN KE DATABASE
         User::create([
-            'nik'      => $data['nik'],
-            'name'     => $data['name'],
+            'nik' => $data['nik'],
+            'name' => $data['name'],
             'username' => $data['username'],
-            'email'    => $data['email'],
+            'email' => $data['email'],
             'password' => bcrypt($data['password']), // Enkripsi password
-            'telp'     => $data['telp'],
-            'role'     => 'masyarakat', // Role default
+            'telp' => $data['telp'],
+            'role' => 'masyarakat', // Role default
         ]);
 
         return redirect()

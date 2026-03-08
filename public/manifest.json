@@ -1,20 +1,25 @@
 {
-    "name": "Aplikasi SIGAP",
+    "name": "SIGAP - Sistem Informasi Pengaduan",
     "short_name": "SIGAP",
+    "description": "Sampaikan keluhan infrastruktur & layanan publik. Cepat, Aman, Transparan.",
     "start_url": "/",
+    "scope": "/",
     "display": "standalone",
-    "background_color": "#ffffff",
-    "theme_color": "#0d6efd",
+    "orientation": "portrait",
+    "background_color": "#0a0a1a",
+    "theme_color": "#00d4ff",
     "icons": [
         {
             "src": "/logo-192.png",
             "sizes": "192x192",
-            "type": "image/png"
+            "type": "image/png",
+            "purpose": "any maskable"
         },
         {
             "src": "/logo-512.png",
             "sizes": "512x512",
-            "type": "image/png"
+            "type": "image/png",
+            "purpose": "any maskable"
         }
     ]
 }
