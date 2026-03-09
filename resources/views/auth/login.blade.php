@@ -1,134 +1,179 @@
 @extends('layouts.master')
-@section('title', 'Login Pengguna')
+@section('title', 'Masuk')
 
 @push('styles')
     <style>
-        .auth-bg-blob-1 {
-            background: radial-gradient(ellipse 60% 60% at 30% 50%, rgba(0, 212, 255, 0.06), transparent);
+        .auth-split {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            min-height: calc(100vh - 56px);
+            margin: -2rem -1rem;
         }
 
-        .auth-bg-blob-2 {
-            background: radial-gradient(ellipse 50% 50% at 70% 50%, rgba(168, 85, 247, 0.06), transparent);
+        @media (max-width: 768px) {
+            .auth-split {
+                grid-template-columns: 1fr;
+            }
+
+            .auth-decor {
+                display: none;
+            }
         }
 
-        @keyframes slideUp {
+        .auth-form-side {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem 2rem;
+            background: var(--color-surface-0);
+        }
+
+        .auth-decor {
+            background: var(--color-surface-1);
+            border-left: 1px solid var(--color-border);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .decor-ring {
+            position: absolute;
+            border-radius: 50%;
+            border: 1px solid var(--color-accent-border);
+            animation: pulse-ring 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse-ring {
+
+            0%,
+            100% {
+                opacity: 0.4;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.15;
+                transform: scale(1.05);
+            }
+        }
+
+        .auth-form-box {
+            width: 100%;
+            max-width: 360px;
+        }
+
+        .input-row {
+            margin-bottom: 1rem;
+        }
+
+        @keyframes slideIn {
             from {
                 opacity: 0;
-                transform: translateY(30px);
+                transform: translateX(-20px);
             }
 
             to {
                 opacity: 1;
-                transform: translateY(0);
+                transform: translateX(0);
             }
         }
 
-        .slide-up {
-            animation: slideUp 0.5s ease both;
-        }
-
-        .input-icon-wrap {
-            position: relative;
-        }
-
-        .input-icon-wrap .icon {
-            position: absolute;
-            left: 14px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--color-muted-text);
-            pointer-events: none;
-            z-index: 5;
-            font-size: 0.95rem;
-        }
-
-        .input-icon-wrap .input-futur {
-            padding-left: 2.75rem;
+        .slide-in {
+            animation: slideIn 0.45s ease both;
         }
     </style>
 @endpush
 
 @section('content')
-    <div class="relative flex items-center justify-center min-h-[calc(100vh-120px)] -mt-8 py-8">
+    <div class="auth-split">
 
-        {{-- Background blobs --}}
-        <div class="auth-bg-blob-1 fixed inset-0 pointer-events-none"></div>
-        <div class="auth-bg-blob-2 fixed inset-0 pointer-events-none"></div>
-
-        <div class="slide-up relative z-10 w-full max-w-md">
-            <div class="panel p-8" style="box-shadow: 0 25px 60px rgba(0,0,0,0.4), 0 0 0 1px rgba(0,212,255,0.06);">
+        {{-- ── Left: Form ── --}}
+        <div class="auth-form-side">
+            <div class="auth-form-box slide-in">
 
                 {{-- Logo --}}
-                <div class="text-center mb-7">
-                    <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl text-3xl mb-3"
-                        style="background: linear-gradient(135deg, var(--color-neon-cyan), var(--color-neon-purple)); box-shadow: 0 0 30px rgba(0,212,255,0.25);">
-                        ⚡
-                    </div>
-                    <h1 class="text-xl font-black text-white">Selamat Datang</h1>
-                    <p class="text-muted-futur text-sm mt-1">Masuk ke akun SIGAP Anda</p>
+                <div class="flex items-center gap-2 mb-8">
+                    <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-sm font-black"
+                        style="background: var(--color-accent); color: #fff;">S</span>
+                    <span class="font-bold text-secondary">SIGAP / Masuk</span>
                 </div>
 
-                {{-- Session error --}}
+                <h2 class="font-extrabold text-2xl mb-1" style="color: var(--color-text-primary);">Selamat datang kembali
+                </h2>
+                <p class="text-secondary text-sm mb-6">Masuk untuk melanjutkan ke akun Anda</p>
+
                 @if(session()->has('loginError'))
-                    <div class="flash-error mb-5">
-                        <i class="bi bi-exclamation-triangle mr-2"></i>{{ session('loginError') }}
+                    <div class="alert-error mb-4"><i class="bi bi-exclamation-triangle mr-1"></i>{{ session('loginError') }}
                     </div>
                 @endif
 
                 <form action="{{ route('login.store') }}" method="POST" autocomplete="off">
                     @csrf
 
-                    {{-- Username --}}
-                    <div class="mb-4">
-                        <label class="label-futur">Username</label>
+                    <div class="input-row">
+                        <label class="label">Username</label>
                         <div class="input-icon-wrap">
-                            <i class="bi bi-person icon"></i>
-                            <input type="text" name="username" class="input-futur" placeholder="Masukkan username"
+                            <i class="bi bi-person iicon"></i>
+                            <input type="text" name="username" class="input" id="username" placeholder="Masukkan username"
                                 value="{{ old('username') }}" required autofocus>
                         </div>
                         @error('username')
-                            <p class="text-neon-red text-xs mt-1 flex items-center gap-1">
-                                <i class="bi bi-exclamation-circle"></i>{{ $message }}
-                            </p>
+                            <p class="text-danger text-xs mt-1"><i class="bi bi-exclamation-circle mr-1"></i>{{ $message }}</p>
                         @enderror
                     </div>
 
-                    {{-- Password --}}
-                    <div class="mb-6">
-                        <label class="label-futur">Password</label>
+                    <div class="input-row">
+                        <label class="label">Password</label>
                         <div class="input-icon-wrap">
-                            <i class="bi bi-lock icon"></i>
-                            <input type="password" name="password" class="input-futur" placeholder="Masukkan password"
-                                required>
+                            <i class="bi bi-lock iicon"></i>
+                            <input type="password" name="password" class="input" placeholder="Kata sandi" required>
                         </div>
                         @error('password')
-                            <p class="text-neon-red text-xs mt-1 flex items-center gap-1">
-                                <i class="bi bi-exclamation-circle"></i>{{ $message }}
-                            </p>
+                            <p class="text-danger text-xs mt-1"><i class="bi bi-exclamation-circle mr-1"></i>{{ $message }}</p>
                         @enderror
                     </div>
 
-                    <button type="submit"
-                        class="btn-neon w-full inline-flex items-center justify-center gap-2 py-3 text-sm">
-                        <i class="bi bi-box-arrow-in-right"></i> MASUK SEKARANG
+                    <button type="submit" class="btn btn-primary btn-full mt-2">
+                        <i class="bi bi-arrow-right-circle"></i> Masuk Sekarang
                     </button>
                 </form>
 
-                {{-- Divider --}}
-                <div class="flex items-center gap-3 my-5">
-                    <div class="flex-1 h-px bg-white/10"></div>
-                    <span class="text-muted-futur text-xs">atau</span>
-                    <div class="flex-1 h-px bg-white/10"></div>
-                </div>
-
-                <p class="text-center text-sm text-muted-futur">
+                <p class="text-center text-sm text-secondary mt-5">
                     Belum punya akun?
-                    <a href="{{ route('register') }}" class="text-neon-cyan font-semibold no-underline hover:underline">
-                        Daftar di sini
-                    </a>
+                    <a href="{{ route('register') }}" class="text-accent font-semibold" style="text-decoration:none;">Daftar
+                        di sini</a>
                 </p>
 
             </div>
         </div>
+
+        {{-- ── Right: Decorative ── --}}
+        <div class="auth-decor">
+            <div class="decor-ring" style="width:300px; height:300px; animation-delay:0s;"></div>
+            <div class="decor-ring" style="width:450px; height:450px; animation-delay:1s;"></div>
+            <div class="decor-ring" style="width:600px; height:600px; animation-delay:2s;"></div>
+
+            <div class="relative z-10 text-center">
+                <div class="text-5xl mb-4">🏛️</div>
+                <h3 class="font-bold text-lg mb-2" style="color: var(--color-text-primary);">Pelayanan Publik Digital</h3>
+                <p class="text-secondary text-sm max-w-xs" style="line-height:1.7;">
+                    Laporan Anda adalah kontribusi nyata untuk lingkungan yang lebih baik.
+                    Bersama SIGAP, suara warga didengar.
+                </p>
+                <div class="flex justify-center gap-3 mt-6 flex-wrap">
+                    @foreach(['Cepat', 'Aman', 'Transparan'] as $p)
+                        <span class="px-3 py-1 rounded-full text-xs font-semibold"
+                            style="background: var(--color-accent-dim); color: var(--color-accent-light); border: 1px solid var(--color-accent-border);">
+                            {{ $p }}
+                        </span>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+
     </div>
 @endsection
