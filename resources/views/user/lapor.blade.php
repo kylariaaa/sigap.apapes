@@ -53,6 +53,56 @@
     #locate-btn:active { transform: translateX(-50%) scale(0.96); }
     #locate-btn.loading { opacity: 0.7; pointer-events: none; }
 
+    /* ── Location Toast ── */
+    #loc-toast {
+        position: fixed;
+        bottom: 1.5rem;
+        left: 50%;
+        transform: translateX(-50%) translateY(80px);
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.8rem 1.25rem;
+        border-radius: 12px;
+        font-size: 0.83rem;
+        font-weight: 600;
+        max-width: 380px;
+        width: calc(100% - 2rem);
+        box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+        transition: transform 0.35s cubic-bezier(.34,1.56,.64,1), opacity 0.3s;
+        opacity: 0;
+        pointer-events: none;
+    }
+    #loc-toast.show {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+        pointer-events: auto;
+    }
+    #loc-toast.toast-warn {
+        background: #1c1a12;
+        border: 1.5px solid #facc15;
+        color: #fef08a;
+    }
+    #loc-toast.toast-info {
+        background: #0f1c2a;
+        border: 1.5px solid var(--color-accent, #0284c7);
+        color: #bae6fd;
+    }
+    #loc-toast .toast-icon { font-size: 1.2rem; flex-shrink: 0; }
+    #loc-toast .toast-close {
+        margin-left: auto;
+        background: none;
+        border: none;
+        color: inherit;
+        opacity: 0.6;
+        cursor: pointer;
+        font-size: 1rem;
+        padding: 0;
+        line-height: 1;
+    }
+    #loc-toast .toast-close:hover { opacity: 1; }
+
     /* ── Chat History ── */
     .history-item {
         padding: 1.25rem;
@@ -140,14 +190,31 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        var map = L.map('map').setView([-6.200000, 106.816666], 13);
+        var DEFAULT_LAT = -6.200000, DEFAULT_LNG = 106.816666;
+
+        var map = L.map('map').setView([DEFAULT_LAT, DEFAULT_LNG], 13);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
             attribution: '© OpenStreetMap'
         }).addTo(map);
 
-        var marker = L.marker([-6.200000, 106.816666], { draggable: true }).addTo(map);
+        var marker = L.marker([DEFAULT_LAT, DEFAULT_LNG], { draggable: true }).addTo(map);
 
+        // ── Toast ──
+        var toastTimer = null;
+        function showToast(msg, type) {
+            var t = document.getElementById('loc-toast');
+            t.className = 'show ' + (type === 'warn' ? 'toast-warn' : 'toast-info');
+            document.getElementById('loc-toast-msg').textContent = msg;
+            document.getElementById('loc-toast-icon').textContent = type === 'warn' ? '⚠️' : 'ℹ️';
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(function () { t.classList.remove('show'); }, 6000);
+        }
+        document.getElementById('loc-toast-close').addEventListener('click', function () {
+            document.getElementById('loc-toast').classList.remove('show');
+        });
+
+        // ── Reverse geocode ──
         function fetchAddress(lat, lng) {
             document.getElementById('latitude').value  = lat;
             document.getElementById('longitude').value = lng;
@@ -165,52 +232,86 @@
             });
         }
 
-        // Auto-locate on load
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(function (pos) {
-                map.setView([pos.coords.latitude, pos.coords.longitude], 16);
-                marker.setLatLng([pos.coords.latitude, pos.coords.longitude]);
-                fetchAddress(pos.coords.latitude, pos.coords.longitude);
-            }, function () { /* denied — keep default */ }, { timeout: 6000 });
+        function moveTo(lat, lng, zoom) {
+            map.setView([lat, lng], zoom || 15);
+            marker.setLatLng([lat, lng]);
+            fetchAddress(lat, lng);
         }
 
-        // Manual locate button
+        // ── Fallback: IP geolocation (tanpa API key) ──
+        function locateByIP(onSuccess, onFail) {
+            fetch('https://ipapi.co/json/')
+                .then(r => r.json())
+                .then(d => {
+                    if (d.latitude && d.longitude) {
+                        onSuccess(parseFloat(d.latitude), parseFloat(d.longitude));
+                    } else { onFail(); }
+                })
+                .catch(onFail);
+        }
+
+        // ── GPS / browser geolocation ──
+        function tryGPS(onSuccess, onFail) {
+            if (!navigator.geolocation) { onFail('not-supported'); return; }
+            navigator.geolocation.getCurrentPosition(
+                function (pos) { onSuccess(pos.coords.latitude, pos.coords.longitude); },
+                function (err) { onFail(err.code); },
+                { enableHighAccuracy: true, timeout: 10000 }
+            );
+        }
+
+        // ── Auto-detect saat load (silent — GPS → IP → Jakarta) ──
+        tryGPS(
+            function (lat, lng) { moveTo(lat, lng, 16); },
+            function () {
+                locateByIP(
+                    function (lat, lng) { moveTo(lat, lng, 13); },
+                    function () { /* pakai Jakarta default */ }
+                );
+            }
+        );
+
+        // ── Tombol Lokasi Saya ──
         var locateBtn = document.getElementById('locate-btn');
         if (locateBtn) {
             locateBtn.addEventListener('click', function () {
-                if (!navigator.geolocation) {
-                    alert('Browser Anda tidak mendukung geolokasi.');
-                    return;
-                }
                 locateBtn.classList.add('loading');
                 locateBtn.innerHTML = '<i class="bi bi-arrow-repeat"></i> Mencari...';
-                navigator.geolocation.getCurrentPosition(
-                    function (pos) {
-                        var lat = pos.coords.latitude, lng = pos.coords.longitude;
-                        map.setView([lat, lng], 17);
-                        marker.setLatLng([lat, lng]);
-                        fetchAddress(lat, lng);
-                        locateBtn.classList.remove('loading');
-                        locateBtn.innerHTML = '<i class="bi bi-crosshair2"></i> Lokasi Saya';
-                    },
-                    function () {
-                        locateBtn.classList.remove('loading');
-                        locateBtn.innerHTML = '<i class="bi bi-crosshair2"></i> Lokasi Saya';
-                        alert('Akses lokasi ditolak. Aktifkan izin lokasi pada browser Anda.');
-                    },
-                    { enableHighAccuracy: true, timeout: 10000 }
+                var done = function () {
+                    locateBtn.classList.remove('loading');
+                    locateBtn.innerHTML = '<i class="bi bi-crosshair2"></i> Lokasi Saya';
+                };
+
+                tryGPS(
+                    function (lat, lng) { moveTo(lat, lng, 17); done(); },
+                    function (code) {
+                        // GPS gagal → coba IP dulu
+                        locateByIP(
+                            function (lat, lng) {
+                                moveTo(lat, lng, 13); done();
+                                showToast('📡 Lokasi perkiraan dari IP jaringan (kurang akurat). Geser marker jika perlu.', 'info');
+                            },
+                            function () {
+                                done();
+                                var isHTTP = location.protocol === 'http:' && location.hostname !== 'localhost';
+                                if (isHTTP) {
+                                    showToast('Geolokasi butuh HTTPS. Akses via HTTPS atau geser marker secara manual.', 'warn');
+                                } else if (code === 1) {
+                                    showToast('Izin lokasi diblokir. Nyalakan izin di browser/Windows lalu coba lagi.', 'warn');
+                                } else if (code === 'not-supported') {
+                                    showToast('Browser tidak mendukung geolokasi. Geser marker secara manual.', 'warn');
+                                } else {
+                                    showToast('Lokasi tidak terdeteksi. Geser marker di peta ke titik yang diinginkan.', 'info');
+                                }
+                            }
+                        );
+                    }
                 );
             });
         }
 
-        marker.on('dragend', () => {
-            var c = marker.getLatLng();
-            fetchAddress(c.lat, c.lng);
-        });
-        map.on('click', e => {
-            marker.setLatLng(e.latlng);
-            fetchAddress(e.latlng.lat, e.latlng.lng);
-        });
+        marker.on('dragend', () => { var c = marker.getLatLng(); fetchAddress(c.lat, c.lng); });
+        map.on('click', e => { marker.setLatLng(e.latlng); fetchAddress(e.latlng.lat, e.latlng.lng); });
     });
 </script>
 @endpush
@@ -402,5 +503,12 @@
         </div>
 
     </div>
+
+{{-- Location Toast Notification --}}
+<div id="loc-toast" role="alert" aria-live="polite">
+    <span id="loc-toast-icon" class="toast-icon">⚠️</span>
+    <span id="loc-toast-msg">Lokasi tidak dapat dideteksi.</span>
+    <button class="toast-close" id="loc-toast-close" aria-label="Tutup">✕</button>
+</div>
 
 @endsection
